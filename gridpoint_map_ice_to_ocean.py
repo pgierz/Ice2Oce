@@ -63,20 +63,18 @@ def latlon_distance(lat1, lon1, lat2, lon2):
 
 def read_ice(filename):
     with netcdf.netcdf_file(filename, mode="r") as fin_ice:
-        time_ice = fin_ice.variables["time"][:].copy().squeeze()
-        ntime_ice = np.size(time_ice) - 1
         lat1 = fin_ice.variables["lat"][:].copy().squeeze()
         lon1 = fin_ice.variables["lon"][:].copy().squeeze()
         x_ice = fin_ice.variables["x"][:].copy().squeeze()
         y_ice = fin_ice.variables["y"][:].copy().squeeze()
-    return time_ice, ntime_ice, lat1, lon1, x_ice, y_ice
+    return lat1, lon1, x_ice, y_ice
 
 
 def read_ocean(filename):
     with netcdf.netcdf_file(filename, mode="r") as fin_oce:
-        tmask = fin_oce.variables["oces.msk"][:].copy()
-        lat2 = fin_oce.variables["oces.lat"][:].copy()
-        lon2 = fin_oce.variables["oces.lon"][:].copy()
+        tmask = fin_oce.variables["oces.mask"][:].copy().squeeze()
+        lat2 = fin_oce.variables["oces.lat"][:].copy().squeeze()
+        lon2 = fin_oce.variables["oces.lon"][:].copy().squeeze()
     return tmask, lat2, lon2
 
 
@@ -344,7 +342,7 @@ def main(args):
 
     print("Load Data files...")
     print("...ice data...")
-    time_ice, ntime_ice, lat1, lon1, x_ice, y_ice = read_ice(args["ICE_FILE"])
+    lat1, lon1, x_ice, y_ice = read_ice(args["ICE_FILE"])
     print("...ocean_data...")
     tmask, lat2, lon2 = read_ocean(args["OCEAN_FILE"])
     print("...finished!")
@@ -383,8 +381,8 @@ if __name__ == '__main__':
     args = docopt.docopt(__doc__)
     do_grid1_2_same_orientation = args["--ice-grid-orientation-as-ocean"] or False
     do_fortran_bound_IJ = args["--do-fortran-boundIJ"] or False
-    if args['--binary-erosion-coast']:
-        make_coastline_mask = iscoast_binary_erosion
-    else:
-        make_coastline_mask = iscoast_explicit
+    #if args['--binary-erosion-coast']:
+    make_coastline_mask = iscoast_binary_erosion
+    #else:
+    #    make_coastline_mask = iscoast_explicit
     main(args)
